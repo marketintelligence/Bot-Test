@@ -1,6 +1,7 @@
 // Have 3 sessions
 // Take profit at 20? Still going to test
 // See if the trailing stop works?
+// Trailing stop works in points
 
 
 #property copyright "Copyright 2018, Cheah Boo Lim"
@@ -23,7 +24,8 @@ input int            Recover_Loss = 0;       // 1 = Open 0 = Close
 // Inputs
 //-------------------------------------------------------------------------
 input string         TrailingFunction ="Tralling Function";
-input double TS = 1;                  //Trailing Stop (pips)
+// (Double 1 = 10 Pips, should go 0.1)
+input double TS = 0.1;                  //Trailing Stop (in Points)
 input bool UC = false;              //Use Certain Order Comment
 input string Comm = "";             //Certain Order Comment
 input bool UM = false;              //Use Certain Order Magic Number
