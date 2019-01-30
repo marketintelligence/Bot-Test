@@ -24,8 +24,8 @@ input int            Recover_Loss = 0;       // 1 = Open 0 = Close
 // Inputs
 //-------------------------------------------------------------------------
 input string         TrailingFunction ="Tralling Function";
-// (Double 1 = 10 Pips, should go 0.1)
-input double TS = 0.1;                  //Trailing Stop (in Points)
+// Kinda follow the silver digits, 0.1 == 100 Point,  0.01 == 10 Points, 0.001 == 1 Points 
+input double TS = 0.01;                  //Trailing Stop (in Points)
 input bool UC = false;              //Use Certain Order Comment
 input string Comm = "";             //Certain Order Comment
 input bool UM = false;              //Use Certain Order Magic Number
@@ -310,7 +310,7 @@ void OnTick()
            {
             if(UC==true && OrderComment()==Comm && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
             if(UC==true && OrderComment()==Comm && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
-            if(UC==true && OrderComment()==Comm && UM==false && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0);
+            if(UC==true && OrderComment()==Comm && UM==false && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
             if(UC==true && OrderComment()==Comm && UM==false && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
             if(UC==false && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
             if(UC==false && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
