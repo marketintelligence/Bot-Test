@@ -1,0 +1,371 @@
+// Have 3 sessions
+// Take profit at 20? Still going to test
+// See if the trailing stop works?
+// Trailing stop works in points
+
+
+#property copyright "Copyright 2018, Cheah Boo Lim"
+#property link      "https://fxforex-trading.com/"
+#property version   "58.00"
+#property strict
+
+
+input string         UsefulFunction ="Useful Function";
+input int            MagicNumber  = 1982;    //Magic Number
+input double         Lots         = 0.01;    //Fixed Lots
+input double         StopLoss     = 100;      //Fixed Stop Loss (in Points)
+input double         Risk         = 1;       // Risk Level (1 - 3)
+input double         TakeProfit   = 0;       //Fixed Take Profit (in Points)
+input double         TrailingStop = 0.2;     //Trailing Stop (in Points)
+input double         Waiting_Time = 0;       // Waiting time (In Seconds)
+input int            Recover_Loss = 0;       // 1 = Open 0 = Close
+
+//-------------------------------------------------------------------------
+// Inputs
+//-------------------------------------------------------------------------
+input string         TrailingFunction ="Tralling Function";
+input int TS = 9;                  //Trailing Stop (in Points)
+input bool UC = false;              //Use Certain Order Comment
+input string Comm = "";             //Certain Order Comment
+input bool UM = false;              //Use Certain Order Magic Number
+input int Magic = 12345;            //Certain Order Magic Number
+//-------------------------------------------------------------------------
+// Variables
+//-------------------------------------------------------------------------
+double pip;
+bool w;
+
+input double         nspread      = 9;       // Normal Spread
+
+input string      aaaaaaaaaa="* EA Settings:";
+input bool        Market_Execution=true;   // ECN, NDD etc
+input bool        Write_Journal=true;
+
+input string      Trade_Hours="* Trade Hours:";
+input int         session1= 0;     // London Session Starts
+input int         session1end= 24;     // After 3 Hours
+input int         session2 = 13;  // New York Seeions Starts
+input int         session2end =17;     // After 6 Hours
+input int         session3 = 17;  // New York Seeions Starts
+input int         session3end =24;     // After 6 Hours
+
+// For Per Candle Usage
+datetime LastActiontime;
+
+
+//---
+int    Slippage=0;
+
+//+------------------------------------------------------------------+
+//| Expert Initialization function                                 |
+//+------------------------------------------------------------------+
+
+int OnInit()
+  {
+//---
+   
+//---
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   Print("You're using Boo Lim Scalper");
+  }
+//+------------------------------------------------------------------+
+//|   expert OnTick function                                         |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+   double TheStopLoss=0;
+   double TheTakeProfit=0;
+   double MyPoint=Point;
+   double Current_Hour = Hour();
+   int i =OrdersHistoryTotal()-1;
+   OrderSelect(i,SELECT_BY_POS,MODE_HISTORY);
+   int Previoustime =OrderCloseTime();
+   int CurrentTime =TimeCurrent();
+   double TimeDifference =CurrentTime-Previoustime;
+   int    cspread = (int)MarketInfo(Symbol(),MODE_SPREAD);
+   
+//+------------------------------------------------------------------+
+//|  AUTO LOT SIZING                                                 |
+//+------------------------------------------------------------------+
+   
+   double Lot= AccountBalance()/(Risk*1000);
+
+
+   if(Digits==4 || Digits<=2) pip=Point;
+//   if(Digits==5 || Digits==3) pip=Point*10;
+   
+//+------------------------------------------------------------------+
+//|  Parabolic SAR Funtion                                           |
+//+------------------------------------------------------------------+
+
+   double sar0  =iSAR(NULL,0,0.02,0.2,0);
+   double sar1  =iSAR(NULL,0,0.02,0.2,1);
+   double sar2  =iSAR(NULL,0,0.02,0.2,2); // Anchor SAR
+   
+//+------------------------------------------------------------------+
+//|  Stochastic Functions Hour Function                              |
+//+------------------------------------------------------------------+
+
+   double hr0  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,0);
+   double hr1  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,1);
+   double hr2  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,2);
+   double hr3  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,3);
+   double hr4  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,4);
+   double hr5  =iStochastic(NULL,PERIOD_H1,5,3,3,0,0,1,5);
+   
+//+------------------------------------------------------------------+
+//|  Stochastic Functions Min Function                              |
+//+------------------------------------------------------------------+
+
+   double min0  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,0);
+   double min1  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,1);
+   double min2  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,2);
+   double min3  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,3);
+   double min4  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,4);
+   double min5  =iStochastic(NULL,PERIOD_M1,5,3,3,0,0,1,5);
+   
+   
+//+------------------------------------------------------------------+
+//|  Candle Funtion                                                  |
+//+------------------------------------------------------------------+
+
+   double high0 = High[0];
+   double high1 = High[1];
+   double high2 = High[2];
+   
+// -- Low Bars ---//
+
+   double low0 = Low[0];
+   double low1 = Low[1];
+   double low2 = Low[2];
+
+  
+//+------------------------------------------------------------------+
+//|  ORDER COUNT LESS THAN 1                                         |
+//+------------------------------------------------------------------+
+
+   if(TotalOrdersCount()==0)
+   
+     {
+     
+      int result=0;
+   
+                
+//+------------------------------------------------------------------+
+//|               MAIN SESSION ENDS                                 |
+//+------------------------------------------------------------------+
+
+   if( 
+   
+       // 4 of the highest volume that day (If miunte is bigger than 55)
+   
+      (Hour()>0)
+      
+      )
+      
+         {
+         
+               Comment
+
+               (
+   
+                  " Trading Hour ",
+                  " Current Time ", Hour(),
+                  " Volume ", Volume[0],
+                  " Bid ", Bid, // Buyer's Price
+                  " Ask ", Ask,  // Seller's Price,
+                  " Hr0 ", hr0,
+                  " Hr1 ", hr1,
+                  " Min0 ", min0,
+                  " Min1 ", min1,
+                  " Spread ", cspread, // current spread
+                  " Previous Profit ", OrderProfit(),
+                  " Account Balance ", AccountBalance()
+                
+                );
+  
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BUY~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      
+   if(  // Buy when market have strong buy
+   
+      (hr1>hr2)&&
+      (hr1>80)&&
+      (hr0>hr1)
+      
+      )
+      {
+              Comment
+
+               (
+   
+                  " BUY ORDER ",
+                  " Current Time ", Hour(),
+                  " Volume ", Volume[0],
+                  " Bid ", Bid, // Buyer's Price
+                  " Ask ", Ask,  // Seller's Price,
+                  " Hr0 ", hr0,
+                  " Hr1 ", hr1,
+                  " Min0 ", min0,
+                  " Min1 ", min1,
+                  " Spread ", cspread, // current spread
+                  " Previous Profit ", OrderProfit(),
+                  " Account Balance ", AccountBalance()
+                
+                );
+                  
+           if(OrderType()==0) // SPREAD MUST BE HIGHER THAN AVERAGE
+                     
+            {
+            
+            Comment( " Previously a Buy");
+            
+            }
+            else
+            {
+                  
+                     result=OrderSend(Symbol(),OP_BUY,Lot,Ask,Slippage,0,0,"BUY S1",MagicNumber,0,clrGreen);
+                                    
+                 if(result>0)
+                  
+                     {
+                        TheStopLoss=0;
+                        TheTakeProfit=0;
+                        if(TakeProfit > 0) TheTakeProfit = Ask + TakeProfit * MyPoint;
+                        if(StopLoss > 0)   TheStopLoss   = Ask - StopLoss * MyPoint;
+                        int MyOrderSelect = OrderSelect(result,SELECT_BY_TICKET);
+                        int MyOrderModify = OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(TheStopLoss,Digits),
+                                                  NormalizeDouble(TheTakeProfit,Digits),0,Green);
+                     }
+             }
+        }
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SELL~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      
+  if (  // Buy when market have strong buy
+   
+      (hr1<20)&&
+      (hr2>hr1)&&
+      (hr0<hr1)
+      
+      )
+        {
+        
+        Comment
+
+               (
+   
+                  " SELL ORDDER ",
+                  " Current Time ", Hour(),
+                  " Volume ", Volume[0],
+                  " Bid ", Bid, // Buyer's Price
+                  " Ask ", Ask,  // Seller's Price,
+                  " Hr0 ", hr0,
+                  " Hr1 ", hr1,
+                  " Min0 ", min0,
+                  " Min1 ", min1,
+                  " Spread ", cspread, // current spread
+                  " Previous Profit ", OrderProfit(),
+                  " Account Balance ", AccountBalance()
+                
+                );
+               
+           if(OrderType()==1) // SPREAD MUST BE HIGHER THAN AVERAGE
+                     
+            {
+            
+            Comment( " Previously a Sell");
+            
+            }
+            else
+            {
+
+                  result=OrderSend(Symbol(),OP_SELL,Lot,Bid,Slippage,0,0,"SELL S1",MagicNumber,0,clrRed);
+               
+                  if(result>0)
+                     
+                     {
+                        TheStopLoss=0;
+                        TheTakeProfit=0;
+                        if(TakeProfit > 0) TheTakeProfit = Bid - TakeProfit * MyPoint;
+                        if(StopLoss > 0)   TheStopLoss   = Bid + StopLoss * MyPoint;
+                        int MyOrderSelect = OrderSelect(result,SELECT_BY_TICKET);
+                        int MyOrderModify = OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(TheStopLoss,Digits),
+                                                  NormalizeDouble(TheTakeProfit,Digits),0,Green);
+                     }
+                        
+            }
+   
+       }
+       
+       else
+       
+           Comment
+
+               (
+   
+                  " NO ORDER ",
+                  " Current Time ", Hour(),
+                  " Volume ", Volume[0],
+                  " Bid ", Bid, // Buyer's Price
+                  " Ask ", Ask,  // Seller's Price,
+                  " Hr0 ", hr0,
+                  " Hr1 ", hr1,
+                  " Min0 ", min0,
+                  " Min1 ", min1,
+                  " Spread ", cspread, // current spread
+                  " Previous Profit ", OrderProfit(),
+                  " Account Balance ", AccountBalance()
+                
+                );
+     }
+//+------------------------------------------------------------------+
+//|               MAIN SESSION ENDS                                  |
+//+------------------------------------------------------------------+
+  }
+  
+//+------------------------------------------------------------------+
+//|              MAIN ENTRY FUNCTION ENDS                            |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|              TRAILING FUNCTION ENDS                              |
+//+------------------------------------------------------------------+
+   for(i=0;i<OrdersTotal();i++)
+     {
+      if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==true)
+        {
+         if(OrderSymbol()==Symbol() && TS>0 && OrderProfit()>0)
+           {
+            if(UC==true && OrderComment()==Comm && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==true && OrderComment()==Comm && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==true && OrderComment()==Comm && UM==false && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==true && OrderComment()==Comm && UM==false && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==false && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==false && UM==true && OrderMagicNumber()==Magic && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==false && UM==false && OrderType()==OP_BUY && OrderOpenPrice()+TS*pip<=Bid && OrderStopLoss()<Bid-TS*pip) w=OrderModify(OrderTicket(),OrderOpenPrice(),Bid-TS*pip,OrderTakeProfit(),0,clrAquamarine);
+            if(UC==false && UM==false && OrderType()==OP_SELL && OrderOpenPrice()-TS*pip>=Ask && (OrderStopLoss()>Ask+TS*pip || OrderStopLoss()==0)) w=OrderModify(OrderTicket(),OrderOpenPrice(),Ask+TS*pip,OrderTakeProfit(),0,clrAquamarine);
+           }
+        }
+     }
+  }
+//+------------------------------------------------------------------+
+//|   expert TotalOrdersCount function                               |
+//+------------------------------------------------------------------+
+int TotalOrdersCount()
+  {
+   int result=0;
+
+   for(int i=0; i<OrdersTotal(); i++)
+     {
+      int MyOrderSelect=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderMagicNumber()==MagicNumber) result++;
+     }
+
+//---
+   return (result);
+  }
+  
